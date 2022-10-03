@@ -1,77 +1,47 @@
----
-title: "Reproducible Reearch"
-author: "Manisha Rana"
-date: "2022-10-03"
-output: html_document
----
-
-#Reproducible Research Course Project
-```{r setoptions,echo=TRUE}
-knitr::opts_chunk$set(echo=TRUE)
-```
-
-
-## Adding the required libraries
-```{r}
 library(ggplot2)
-```
 
-## Loading and exploring the dataset
-```{r}
+
+#Loading the data
 activity_data <- read.csv("activity.csv")
 summary(activity_data)
 str(activity_data)
-```
 
-## Calculating the mean total number of steps taken per day
-```{r}
+#Making histogram
 total_steps <- tapply(activity_data$steps,activity_data$date,sum,na.rm=TRUE)
 qplot(total_steps,binwidth=1000,xlab="total number of steps taken each day")
-```
 
-## Making Time Series Plot of  average daily activity pattern
-```{r}
+#mean and median of total steps taken
+mean(total_steps,na.rm=TRUE)
+median(total_steps,na.rm=TRUE)
+
+#Time Series Plot
 data_avg <- aggregate(x=list(avg_steps=activity_data$steps), by=list(step_interval=activity_data$interval), 
                       FUN=mean, na.rm=TRUE)
 ggplot(data=data_avg, aes(x=step_interval, y=avg_steps)) +
   geom_line() +
   xlab("5-minute interval") +
   ylab("average number of steps taken")
-```
 
-## Calculating the max 5-minute interval
-```{r}
+#Max 5 minute interval
 max_steps <- data_avg$step_interval[which.max(data_avg$avg_steps)]
 max_steps
-```
 
-## Calculating the missing values
-```{r}
+#Total missing value
 colSums(is.na(activity_data))
-```
 
-## Imputing the missing values with mean 
-```{r}
+#Imputing the missing values
 activity_data$steps[is.na(activity_data$steps)] <- mean(activity_data$steps, na.rm = TRUE)
 activity_new_data <- activity_data
-```
 
-## Creating histogram after imputing missing values
-```{r}
+#Histogram after imputing data
 total_new_steps <- tapply(activity_new_data$steps,activity_new_data$date,sum,na.rm=TRUE)
 qplot(total_new_steps,binwidth=1000,xlab="total number of steps taken each day")
-```
 
-## Calculating mean and median after imputing the missing values
-```{r}
+#Mean and median after imputing data
 mean(total_new_steps,na.rm = TRUE)
 median(total_new_steps,na.rm = TRUE)
-```
 
-## Mean and median values are higher after imputing the missing data as now the missing values were filled with mean of the steps for the associated interval
-
-## Creating a factor variable which identifies a day as either a weekday or weekend
-```{r}
+#Creating factor variable for weekday and weekend
 day_type <- function(date) {
   day <- weekdays(date)
   if (day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
@@ -85,14 +55,8 @@ day_type <- function(date) {
 activity_new_data$date <- as.Date(activity_new_data$date)
 activity_new_data$day <- sapply(activity_new_data$date, FUN=day_type)
 table(activity_new_data$day)
-```
 
-## Making a panel plot containing average number of steps on weekday and weekend
-```{r}
+#Creating Time Series Plot
 averages_new_data <- aggregate(steps ~ interval + day, data=activity_new_data, mean)
 ggplot(averages_new_data, aes(interval, steps)) + geom_line() + facet_grid(day ~ .) +
   xlab("5-minute interval") + ylab("Number of steps")
-```
-
-
-
